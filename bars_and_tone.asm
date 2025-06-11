@@ -8,13 +8,13 @@
 * Part of this routine was written by Trey Tomes. You can see it here:
 * https://treytomes.wordpress.com/2019/12/31/a-rogue-like-in-6809-assembly-pt-2/
 
-	ORG $0f00		; Will work on any machine including
-				; ones with only 4K RAM
+	ORG $3000		; Will work on any machine that has 16K+ RAM
+				; Will not work with 4K machine
 
 TEXTSTART	EQU 1024		; Start of text mode buffer
 TEXTEND		EQU (TEXTSTART+512)	; End of text mode buffer
-PORT_EA 	EQU $FF23		; Port Enable Audio (bit 3)
-PORT_A  	EQU $FF20		; Port Audio (top 6 bits)
+AUDIO_PORT_ON	EQU $FF23		; Port Enable Audio (bit 3)
+AUDIO_PORT  	EQU $FF20		; Port Audio (top 6 bits)
 SINE_TABLE	EQU "sine_table.asm"	; A generated sine wave
 POLCAT		EQU $A000		; A ROM routine
 
@@ -31,117 +31,51 @@ cls_loop:
 
 * Print the title screen
 
-first_line:
-	ldx #FIRSTLINELOC
-	ldy #FIRSTLINE
+	ldy #title_screen_text
 
-first_line_loop:
+print_line:
+	ldx ,y++		; Load location to copy into
+
+line_loop:
 	lda ,y+
-	beq second_line
+	beq next_line
 
 	sta ,x+
-	bra first_line_loop
+	bra line_loop
 
-second_line:
-	ldx #SECONDLINELOC
-	ldy #SECONDLINE
+next_line:
+	cmpy #title_screen_text_end
+	blt print_line
 
-second_line_loop:
-	lda ,y+
-	beq third_line
+* Wait for spacebar
 
-	sta ,x+
-	bra second_line_loop
-
-third_line:
-	ldx #THIRDLINELOC
-	ldy #THIRDLINE
-
-third_line_loop:
-	lda ,y+
-	beq fourth_line
-
-	sta ,x+
-	bra third_line_loop
-
-fourth_line:
-	ldx #FOURTHLINELOC
-	ldy #FOURTHLINE
-
-fourth_line_loop:
-	lda ,y+
-	beq fifth_line
-
-	sta ,x+
-	bra fourth_line_loop
-
-fifth_line:
-	ldx #FIFTHLINELOC
-	ldy #FIFTHLINE
-
-fifth_line_loop:
-	lda ,y+
-	beq sixth_line
-
-	sta ,x+
-	bra fifth_line_loop
-
-sixth_line:
-	ldx #SIXTHLINELOC
-	ldy #SIXTHLINE
-
-sixth_line_loop:
-	lda ,y+
-	beq wait_for_spacebar
-
-	sta ,x+
-	bra sixth_line_loop
-
-wait_for_spacebar:
+poll_keyboard:
 	jsr [POLCAT]		; Branch to the address in $A000
 
 	cmpa #' '
-	bne wait_for_spacebar
+	bne poll_keyboard
 
-bars:
+* Now paint the bars
+
 	ldx #TEXTSTART		; Start of text mode buffer
 
 start_of_line:
+
+draw_line:
 	ldd #0b1000111110001111	; Do 2 character positions at once,
 				; semi-graphics 4, color #1,
 				; all 4 elements on for both positions
 
+	ldy #8			; Do this routine 8 times
+
+draw_bar:
 	std ,x++		; Store 2 character positions per std
 	std ,x++		; So a total of 4
 
 	addd #0b0001000000010000	; Add one to each color code
 
-	std ,x++		; And store 4 more character positions
-	std ,x++
-
-	addd #0b0001000000010000	; Color 3
-	std ,x++
-	std ,x++
-
-	addd #0b0001000000010000	; Color 4
-	std ,x++
-	std ,x++
-
-	addd #0b0001000000010000	; Color 5
-	std ,x++
-	std ,x++
-
-	addd #0b0001000000010000	; Color 6
-	std ,x++
-	std ,x++
-
-	addd #0b0001000000010000	; Color 7
-	std ,x++
-	std ,x++
-
-	addd #0b0001000000010000	; Color 8
-	std ,x++
-	std ,x++
+	leay -1, y
+	bne draw_bar
 
 	cmpx #TEXTEND		; Have we reached the end?
 	blo  start_of_line	; No, do another line
@@ -151,9 +85,9 @@ tone:
 	orcc #$50		; Turn off IRQ and FIRQ
 	clr  $ff40		; Turn off disk motor
 
-	lda PORT_EA
+	lda AUDIO_PORT_ON
 	ora #0b00001000
-	sta PORT_EA ; Turn on audio
+	sta AUDIO_PORT_ON ; Turn on audio
 ; End code written by or modified from code written by Trey Tomes
 
 start_sending:
@@ -161,25 +95,36 @@ start_sending:
 
 send_value:
 	lda ,x+
-	sta PORT_A		; Poke the relevant value into Port Audio
+	sta AUDIO_PORT		; Poke the relevant value into Port Audio
 
 	cmpx #sine_table_end
 	blo  send_value
 
 	bra  start_sending	; This program never exits
 
-FIRSTLINELOC EQU TEXTSTART + 2 * 32 + 4
-FIRSTLINE FCV "BARS AND TONE GENERATOR",0
-SECONDLINELOC EQU TEXTSTART + 3 * 32 + 7
-SECONDLINE FCV "BY RICHARD CAVELL",0
-THIRDLINELOC EQU TEXTSTART + 7 * 32 + 6
-THIRDLINE FCV "HTTPS://GITHUB.COM/",0
-FOURTHLINELOC EQU TEXTSTART + 8 * 32 + 2
-FOURTHLINE  FCV "RICHARDCAVELL/BARS-AND-TONE",0
-FIFTHLINELOC EQU TEXTSTART + 12 * 32 + 6
-FIFTHLINE FCV "PRESS SPACE TO BEGIN",0
-SIXTHLINELOC EQU TEXTSTART + 13 * 32 + 3
-SIXTHLINE FCV "POWER OFF OR RESET TO END",0
+title_screen_text:
+
+	FDB TEXTSTART + 2 * 32 + 4
+	FCV "BARS AND TONE GENERATOR",0
+
+	FDB TEXTSTART + 3 * 32 + 7
+	FCV "BY RICHARD CAVELL",0
+
+	FDB TEXTSTART + 5 * 32 + 6
+	FCV "HTTPS://GITHUB.COM/",0
+	FDB TEXTSTART + 6 * 32 + 2
+	FCV "RICHARDCAVELL/BARS-AND-TONE",0
+
+	FDB TEXTSTART + 9 * 32 + 6
+	FCV "THE TONE IS MIDDLE C",0
+
+	FDB TEXTSTART + 12 * 32 + 6
+	FCV "PRESS SPACE TO BEGIN",0
+
+	FDB TEXTSTART + 13 * 32 + 3
+	FCV "POWER OFF OR RESET TO END",0
+
+title_screen_text_end:
 
 sine_table:
 	INCLUDE SINE_TABLE
