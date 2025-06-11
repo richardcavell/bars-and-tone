@@ -5,12 +5,12 @@ ASM	=	asm6809	# by Ciaran Anscomb
 DSKNAME =	BARSTONE.DSK
 FNAME	=	BARSTONE.BIN
 
+.PHONY: all clean disk test
+
 $(FNAME): bars-and-tone.asm
 	@echo "Assembling..."
 	asm6809 -C -o $@ $<
 	@echo "Done"
-
-.PHONY: clean disk test
 
 # If your rm command doesn't have -v, then remove the @ from the command
 # below
