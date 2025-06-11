@@ -6,6 +6,9 @@ DSKNAME =	BARSTONE.DSK
 FNAME	=	BARSTONE.BIN
 
 .PHONY: all clean disk test
+.DEFAULT: all
+
+all: $(FNAME) $(DSKNAME)
 
 $(FNAME): bars-and-tone.asm
 	@echo "Assembling..."
@@ -16,7 +19,7 @@ $(FNAME): bars-and-tone.asm
 # below
 
 clean:
-	@rm -v $(FNAME)
+	@rm -v $(FNAME) $(DSKNAME)
 
 disk: $(DSKNAME)
 
