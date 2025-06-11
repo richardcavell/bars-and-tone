@@ -9,8 +9,11 @@
 	ORG $0f00		; Will work on any machine including
 				; ones with only 4K RAM
 
-TEXTRAM	EQU 1024		; Start of text mode RAM
-TEXTEND	EQU (TEXTRAM+511)	; End of text mode RAM
+TEXTRAM		EQU 1024		; Start of text mode RAM
+TEXTEND		EQU (TEXTRAM+511)	; End of text mode RAM
+PORT_EA 	EQU $FF23		; Port Enable Audio (bit 3)
+PORT_A  	EQU $FF20		; Port Audio (top 6 bits)
+SINE_TABLE	EQU "sine_table.out"	; A generated sine wave
 
 start:
 	ldx #TEXTRAM		; Start of text mode RAM
@@ -54,7 +57,27 @@ start_of_line:
 	std ,x++
 
 	cmpx #TEXTEND		; Have we reached the end?
-	blo start_of_line	; No, do another line
+	blo  start_of_line	; No, do another line
 
-finished:
-	bra finished
+	orcc #$50		; Turn off IRQ and FIRQ
+	clr  $ff40		; Turn off disk motor
+
+	lda  #PORT_EA
+	ora  #0b00001000		; Turn on audio
+	sta  PORT_EA
+
+start_sending:
+	ldx #sine_table
+
+send_value:
+	lda ,x+
+	sta PORT_A		; Poke the relevant value into Port Audio
+
+	cmpx #sine_table_end
+	blo  send_value
+
+	bra  start_sending
+
+sine_table:
+	INCLUDEBIN SINE_TABLE
+sine_table_end:
