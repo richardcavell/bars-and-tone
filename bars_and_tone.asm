@@ -2,14 +2,13 @@
 * by Richard Cavell (richardcavell@mail.com)
 * June 2025
 *
-*
 * This program is intended to be assembled by Ciaran Anscomb's asm6809.
 *
 * Part of this routine was written by Trey Tomes. You can see it here:
 * https://treytomes.wordpress.com/2019/12/31/a-rogue-like-in-6809-assembly-pt-2/
 
 	ORG $3000		; Will work on any machine that has 16K+ RAM
-				; Will not work with 4K machine
+				; Will not work with a 4K machine
 
 TEXTSTART	EQU 1024		; Start of text mode buffer
 TEXTEND		EQU (TEXTSTART+512)	; End of text mode buffer
