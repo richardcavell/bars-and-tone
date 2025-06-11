@@ -40,7 +40,7 @@ $(SINENAME): $(SINEEXEC)
 
 $(SINEEXEC): $(SINESRC)
 	@echo "Compiling" $(SINEEXEC) "..."
-	$(CC) $(CFLAGS) $(LDFLAGS) -o $(SINEEXEC) $(SINESRC)
+	$(CC) $(CFLAGS) $(LDFLAGS) -o $(SINEEXEC) $(SINESRC) -lm
 	@echo "Done"
 
 $(FNAME): $(SRCFNAME) $(SINENAME)

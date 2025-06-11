@@ -5,15 +5,19 @@
  * richardcavell@mail.com
  */
 
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 
 const char *fname = "sine_table.bin";
+const int length = 190; /* Number of numbers to output */
+const double pi = 3.1415926535897931;
 
 int main(int argc, char *argv[])
 {
 	FILE *fp = NULL;
-/* 	int val = 0; */
+ 	int val = 0;
+	int i = 0;
 
 	if (argc < 2)
 	{
@@ -29,11 +33,12 @@ int main(int argc, char *argv[])
 		exit(EXIT_FAILURE);
 	}
 
-	fprintf(fp, "%c", 0);
-	fprintf(fp, "%c", 100);
-	fprintf(fp, "%c", 100);
-	fprintf(fp, "%c", 100);
-	fprintf(fp, "%c", 100);
+	for (i = 0;i < length; ++i)
+	{
+		double d_val = sin((i / (double) length) * 2 * pi);
+		val = (int) ((d_val + 0.5)*255) + 0x80;	/* 0x80 is the bias */
+		fprintf(fp, "%c", val);
+	}
 
 	if (fclose(fp) == EOF)
 	{
