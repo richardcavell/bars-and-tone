@@ -62,5 +62,5 @@ $(DSKNAME): $(FNAME)
 clean:
 	@rm -v $(SINENAME) $(SINEEXEC) $(FNAME) $(DSKNAME)
 
-test: $(FNAME)
+test: $(FNAME) $(SRCFNAME) $(SINENAME)
 	xroar -machine coco2b -run $(FNAME)
