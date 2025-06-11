@@ -13,7 +13,7 @@ const char *fname = "sine_table.bin";
 int main(int argc, char *argv[])
 {
 	FILE *fp = NULL;
-	int val = 0;
+/* 	int val = 0; */
 
 	if (argc < 2)
 	{
@@ -30,8 +30,10 @@ int main(int argc, char *argv[])
 	}
 
 	fprintf(fp, "%c", 0);
-	fprintf(fp, "%c", 255);
-	fprintf(fp, "%c", val);
+	fprintf(fp, "%c", 100);
+	fprintf(fp, "%c", 100);
+	fprintf(fp, "%c", 100);
+	fprintf(fp, "%c", 100);
 
 	if (fclose(fp) == EOF)
 	{

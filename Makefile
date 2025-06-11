@@ -10,6 +10,24 @@ SINESRC		=	sine_generator.c
 SINEEXEC	=	sine_generator
 SINENAME 	=	sine_table.out
 
+# Compilation flags
+CC        =  gcc
+CFLAGS    = -std=c89 -Wpedantic
+CFLAGS   += -Wall -Wextra -Werror -fmax-errors=1
+CFLAGS   += -Walloca -Wbad-function-cast -Wcast-align -Wcast-qual -Wconversion
+CFLAGS   += -Wdisabled-optimization -Wdouble-promotion -Wduplicated-cond
+CFLAGS   += -Werror=format-security -Werror=implicit-function-declaration
+CFLAGS   += -Wfloat-equal -Wformat=2 -Wformat-overflow -Wformat-truncation
+CFLAGS   += -Wlogical-op -Wmissing-prototypes -Wmissing-declarations
+CFLAGS   += -Wno-missing-field-initializers -Wnull-dereference
+CFLAGS   += -Woverlength-strings -Wpointer-arith -Wredundant-decls -Wshadow
+CFLAGS   += -Wsign-conversion -Wstack-protector -Wstrict-aliasing
+CFLAGS   += -Wstrict-overflow -Wswitch-default -Wswitch-enum
+CFLAGS   += -Wundef -Wunreachable-code -Wunsafe-loop-optimizations
+CFLAGS   += -fstack-protector-strong
+CFLAGS   += -g -O2
+LDFLAGS   = -Wl,-z,defs -Wl,-O1 -Wl,--gc-sections -Wl,-z,relro
+
 .PHONY: all clean disk test
 .DEFAULT: all
 
@@ -22,17 +40,17 @@ $(SINENAME): $(SINEEXEC)
 
 $(SINEEXEC): $(SINESRC)
 	@echo "Compiling" $(SINEEXEC) "..."
-	gcc -o $(SINEEXEC) $(SINESRC)
+	$(CC) $(CFLAGS) $(LDFLAGS) -o $(SINEEXEC) $(SINESRC)
 	@echo "Done"
 
-$(FNAME): $(SRCFNAME)
+$(FNAME): $(SRCFNAME) $(SINENAME)
 	@echo "Assembling..."
 	asm6809 -C -o $@ $<
 	@echo "Done"
 
 disk: $(DSKNAME)
 
-$(DSKNAME):
+$(DSKNAME): $(FNAME)
 	@echo "Putting disk image together ..."
 	decb dskini -3 $(DSKNAME)
 	decb copy -2 -b -r $(FNAME) $(DSKNAME),$(FNAME)
