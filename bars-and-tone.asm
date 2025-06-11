@@ -1,5 +1,7 @@
 * barstone.asm
 * by Richard Cavell
+* June 2025
+*
 * richardcavell@mail.com
 *
 * This program is intended to be assembled by Ciaran Anscomb's asm6809.
@@ -7,8 +9,8 @@
 	ORG $0f00		; Will work on any machine including
 				; ones with only 4K RAM
 
-TEXTRAM	EQU 1024
-TEXTEND	EQU (TEXTRAM+512)
+TEXTRAM	EQU 1024		; Start of text mode RAM
+TEXTEND	EQU (TEXTRAM+511)	; End of text mode RAM
 
 start:
 	ldx #TEXTRAM		; Start of text mode RAM
@@ -19,19 +21,37 @@ start_of_line:
 				; semi-graphics 4, color #1,
 				; all 4 elements on for both positions
 
-poke_4_character_positions:
-
 	std ,x++		; Store 2 character positions per std
 	std ,x++		; So a total of 4
 
-				; Add one to the color codes
-	addd #0b00001000000010000
+	addd #0b0001000000010000	; Add one to each color code
 
-				; Do 8 of these
-	bvc poke_4_character_positions
+	std ,x++		; And store 4 more character positions
+	std ,x++
 
-				; If we fall through, there has been an
-				; overflow, so we are on the next line
+	addd #0b0001000000010000	; Color 3
+	std ,x++
+	std ,x++
+
+	addd #0b0001000000010000	; Color 4
+	std ,x++
+	std ,x++
+
+	addd #0b0001000000010000	; Color 5
+	std ,x++
+	std ,x++
+
+	addd #0b0001000000010000	; Color 6
+	std ,x++
+	std ,x++
+
+	addd #0b0001000000010000	; Color 7
+	std ,x++
+	std ,x++
+
+	ldd #0b1000111110001111		; Color 8 (represented by 0)
+	std ,x++
+	std ,x++
 
 	cmpx #TEXTEND		; Have we reached the end?
 	blo start_of_line	; No, do another line
