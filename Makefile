@@ -4,8 +4,8 @@
 
 ASM		=	asm6809	# by Ciaran Anscomb
 SRCFNAME	=	bars_and_tone.asm
-CDSKNAME 	=	COCO.DSK
-DDSKNAME	=	DRAGON.DSK
+CDSKNAME 	=	BARSTONE.DSK
+CONDSKNAME	=	BARSTONE.BIN
 CFNAME		=	COCO.BIN
 DFNAME		=	DRAGON.BIN
 SINESRC		=	sine_generator.c
@@ -30,10 +30,10 @@ CFLAGS   += -fstack-protector-strong
 CFLAGS   += -g -O2
 LDFLAGS   = -Wl,-z,defs -Wl,-O1 -Wl,--gc-sections -Wl,-z,relro
 
-.PHONY: all clean disks test-coco test-dragon
+.PHONY: all clean disk test-coco test-dragon
 .DEFAULT: all
 
-all: $(SINENAME) $(SINEEXEC) $(CFNAME) $(DDNAME) $(CDSKNAME) $(DDSKNAME)
+all: $(SINENAME) $(SINEEXEC) $(CFNAME) $(DFNAME) $(CDSKNAME)
 
 $(SINENAME): $(SINEEXEC)
 	@echo "Running" $(SINEEXEC) "..."
@@ -55,25 +55,19 @@ $(DFNAME): $(SRCFNAME) $(SINENAME)
 	asm6809 -D -o $@ $<
 	@echo "Done"
 
-
-disks: $(CDSKNAME) $(DDSKNAME)
+disk: $(CDSKNAME)
 
 $(CDSKNAME): $(CFNAME)
 	@echo "Putting Color Computer disk image together ..."
 	decb dskini -3 $(CDSKNAME)
-	decb copy -2 -b -r $(FNAME) $(CDSKNAME),$(FNAME)
-	@echo "Done"
-
-$(DDSKNAME): $(DFNAME)
-	@echo "Putting Dragon computer disk image together..."
+	decb copy -2 -b -r $(FNAME) $(CDSKNAME),$(CONDSKNAME)
 	@echo "Done"
 
 # If your rm command doesn't have -v, then remove the @ from the command
 # below
 
 clean:
-	@rm -v $(SINENAME) $(SINEEXEC) $(CFNAME) $(DFNAME)
-	@rm -v $(CDSKNAME) $(DDSKNAME)
+	@rm -v $(SINENAME) $(SINEEXEC) $(CFNAME) $(DFNAME) $(CDSKNAME)
 
 test-coco: $(FNAME) $(SRCFNAME) $(SINENAME)
 	xroar -machine coco2b -run $(CFNAME)
