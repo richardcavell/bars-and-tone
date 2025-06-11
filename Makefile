@@ -8,7 +8,7 @@ DSKNAME 	=	BARSTONE.DSK
 FNAME		=	BARSTONE.BIN
 SINESRC		=	sine_generator.c
 SINEEXEC	=	sine_generator
-SINENAME 	=	sine_table.out
+SINENAME 	=	sine_table.asm
 
 # Compilation flags
 CC        =  gcc

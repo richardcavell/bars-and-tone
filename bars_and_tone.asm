@@ -5,6 +5,9 @@
 * richardcavell@mail.com
 *
 * This program is intended to be assembled by Ciaran Anscomb's asm6809.
+*
+* Some parts of this routine were written by Trey Tomes.
+* https://treytomes.wordpress.com/2019/12/31/a-rogue-like-in-6809-assembly-pt-2/
 
 	ORG $0f00		; Will work on any machine including
 				; ones with only 4K RAM
@@ -59,12 +62,14 @@ start_of_line:
 	cmpx #TEXTEND		; Have we reached the end?
 	blo  start_of_line	; No, do another line
 
+; This code was modified from code written by Trey Tomes.
 	orcc #$50		; Turn off IRQ and FIRQ
 	clr  $ff40		; Turn off disk motor
 
-	lda  #PORT_EA
-	ora  #0b00001000		; Turn on audio
-	sta  PORT_EA
+	lda PORT_EA
+	ora #0b00001000
+	sta PORT_EA ; Turn on audio
+; End code written by or modified from code written by Trey Tomes
 
 start_sending:
 	ldx #sine_table
@@ -79,5 +84,5 @@ send_value:
 	bra  start_sending
 
 sine_table:
-	INCLUDEBIN SINE_TABLE
+	INCLUDE SINE_TABLE
 sine_table_end:
