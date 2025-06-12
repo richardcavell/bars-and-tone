@@ -1,11 +1,15 @@
 * bars_and_tone.asm
 * by Richard Cavell (richardcavell@mail.com)
+* Version 1.0
 * June 2025
 *
 * This program is intended to be assembled by Ciaran Anscomb's asm6809.
 *
 * Part of this routine was written by Trey Tomes. You can see it here:
 * https://treytomes.wordpress.com/2019/12/31/a-rogue-like-in-6809-assembly-pt-2/
+* Part of this routine was written by other authors. You can see it here:
+* https://github.com/cocotowretro/VideoCompanionCode/blob/main/AsmSound/Notes0.1/src/Notes.asm
+
 
 	ORG $3000		; Will work on any machine that has 16K+ RAM
 				; Will not work with a 4K machine
@@ -13,7 +17,9 @@
 TEXTSTART	EQU 1024		; Start of text mode buffer
 TEXTEND		EQU (TEXTSTART+512)	; End of text mode buffer
 AUDIO_PORT_ON	EQU $FF23		; Port Enable Audio (bit 3)
-AUDIO_PORT  	EQU $FF20		; Port Audio (top 6 bits)
+PIA2_CRA	EQU $FF21
+DDRA		EQU $FF20
+AUDIO_PORT  	EQU $FF20		; (top 6 bits)
 SINE_TABLE	EQU "sine_table.asm"	; A generated sine wave
 POLCAT		EQU $A000		; A ROM routine
 
@@ -58,8 +64,6 @@ poll_keyboard:
 
 	ldx #TEXTSTART		; Start of text mode buffer
 
-start_of_line:
-
 draw_line:
 	ldd #0b1000111110001111	; Do 2 character positions at once,
 				; semi-graphics 4, color #1,
@@ -77,17 +81,31 @@ draw_bar:
 	bne draw_bar
 
 	cmpx #TEXTEND		; Have we reached the end?
-	blo  start_of_line	; No, do another line
+	blo  draw_line		; No, do another line
 
 tone:
-; This code was modified from code written by Trey Tomes.
+* This code was modified from code written by Trey Tomes.
 	orcc #$50		; Turn off IRQ and FIRQ
 	clr  $ff40		; Turn off disk motor
 
 	lda AUDIO_PORT_ON
 	ora #0b00001000
 	sta AUDIO_PORT_ON ; Turn on audio
-; End code written by or modified from code written by Trey Tomes
+* End code written by or modified from code written by Trey Tomes
+
+* This code was written by other people.
+
+	ldb PIA2_CRA
+	andb #0b11111011
+	stb PIA2_CRA
+
+	lda #0b11111100
+	sta DDRA
+
+	orb #0b00000100
+	stb PIA2_CRA
+
+* End of code written by other people
 
 start_sending:
 	ldx #sine_table

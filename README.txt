@@ -1,5 +1,5 @@
 Readme.txt
-Bars-and-tone
+Bars And Tone Generator v1.0
 by Richard Cavell
 June 2025
 

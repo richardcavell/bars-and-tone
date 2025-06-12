@@ -1,5 +1,6 @@
 # Makefile
 # bars-and-tone by Richard Cavell
+# Version 1.0
 # June 2025
 
 ASM		=	asm6809	# by Ciaran Anscomb
@@ -60,7 +61,7 @@ disk: $(CDSKNAME)
 $(CDSKNAME): $(CFNAME)
 	@echo "Putting Color Computer disk image together ..."
 	decb dskini -3 $(CDSKNAME)
-	decb copy -2 -b -r $(FNAME) $(CDSKNAME),$(CONDSKNAME)
+	decb copy -2 -b -r $(CFNAME) $(CDSKNAME),$(CONDSKNAME)
 	@echo "Done"
 
 # If your rm command doesn't have -v, then remove the @ from the command
